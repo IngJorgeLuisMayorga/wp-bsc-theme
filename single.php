@@ -1,31 +1,40 @@
 <?php
 /**
- * The template for displaying all single posts.
+ * The template for displaying all single posts
  *
- * @package storefront
+ * @link https://developer.wordpress.org/themes/basics/template-hierarchy/#single-post
+ *
+ * @package BubbleSkinCareTheme
  */
 
-get_header(); ?>
+get_header();
+?>
 
-	<div id="primary" class="content-area">
-		<main id="main" class="site-main" role="main">
+	<main id="primary" class="site-main">
 
 		<?php
 		while ( have_posts() ) :
 			the_post();
 
-			do_action( 'storefront_single_post_before' );
+			get_template_part( 'template-parts/content', get_post_type() );
 
-			get_template_part( 'content', 'single' );
+			the_post_navigation(
+				array(
+					'prev_text' => '<span class="nav-subtitle">' . esc_html__( 'Previous:', 'bubbleskincare' ) . '</span> <span class="nav-title">%title</span>',
+					'next_text' => '<span class="nav-subtitle">' . esc_html__( 'Next:', 'bubbleskincare' ) . '</span> <span class="nav-title">%title</span>',
+				)
+			);
 
-			do_action( 'storefront_single_post_after' );
+			// If comments are open or we have at least one comment, load up the comment template.
+			if ( comments_open() || get_comments_number() ) :
+				comments_template();
+			endif;
 
 		endwhile; // End of the loop.
 		?>
 
-		</main><!-- #main -->
-	</div><!-- #primary -->
+	</main><!-- #main -->
 
 <?php
-do_action( 'storefront_sidebar' );
+get_sidebar();
 get_footer();

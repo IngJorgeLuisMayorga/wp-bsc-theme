@@ -1,11 +1,13 @@
 <?php
 /**
- * The template for displaying comments.
+ * The template for displaying comments
  *
- * The area of the page that contains both current comments
+ * This is the template that displays the area of the page that contains both the current comments
  * and the comment form.
  *
- * @package storefront
+ * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
+ *
+ * @package BubbleSkinCareTheme
  */
 
 /*
@@ -18,70 +20,58 @@ if ( post_password_required() ) {
 }
 ?>
 
-<section id="comments" class="comments-area" aria-label="<?php esc_attr_e( 'Post Comments', 'storefront' ); ?>">
+<div id="comments" class="comments-area">
 
 	<?php
+	// You can start editing here -- including this comment!
 	if ( have_comments() ) :
 		?>
 		<h2 class="comments-title">
 			<?php
-				// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+			$bubbleskincare_comment_count = get_comments_number();
+			if ( '1' === $bubbleskincare_comment_count ) {
 				printf(
-					/* translators: 1: number of comments, 2: post title */
-					esc_html( _nx( '%1$s thought on &ldquo;%2$s&rdquo;', '%1$s thoughts on &ldquo;%2$s&rdquo;', get_comments_number(), 'comments title', 'storefront' ) ),
-					number_format_i18n( get_comments_number() ),
-					'<span>' . get_the_title() . '</span>'
+					/* translators: 1: title. */
+					esc_html__( 'One thought on &ldquo;%1$s&rdquo;', 'bubbleskincare' ),
+					'<span>' . wp_kses_post( get_the_title() ) . '</span>'
 				);
-				// phpcs:enable
+			} else {
+				printf( 
+					/* translators: 1: comment count number, 2: title. */
+					esc_html( _nx( '%1$s thought on &ldquo;%2$s&rdquo;', '%1$s thoughts on &ldquo;%2$s&rdquo;', $bubbleskincare_comment_count, 'comments title', 'bubbleskincare' ) ),
+					number_format_i18n( $bubbleskincare_comment_count ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					'<span>' . wp_kses_post( get_the_title() ) . '</span>'
+				);
+			}
 			?>
-		</h2>
+		</h2><!-- .comments-title -->
 
-		<?php if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : // Are there comments to navigate through. ?>
-		<nav id="comment-nav-above" class="comment-navigation" role="navigation" aria-label="<?php esc_attr_e( 'Comment Navigation Above', 'storefront' ); ?>">
-			<span class="screen-reader-text"><?php esc_html_e( 'Comment navigation', 'storefront' ); ?></span>
-			<div class="nav-previous"><?php previous_comments_link( __( '&larr; Older Comments', 'storefront' ) ); ?></div>
-			<div class="nav-next"><?php next_comments_link( __( 'Newer Comments &rarr;', 'storefront' ) ); ?></div>
-		</nav><!-- #comment-nav-above -->
-		<?php endif; // Check for comment navigation. ?>
+		<?php the_comments_navigation(); ?>
 
 		<ol class="comment-list">
 			<?php
-				wp_list_comments(
-					array(
-						'style'      => 'ol',
-						'short_ping' => true,
-						'callback'   => 'storefront_comment',
-					)
-				);
+			wp_list_comments(
+				array(
+					'style'      => 'ol',
+					'short_ping' => true,
+				)
+			);
 			?>
 		</ol><!-- .comment-list -->
 
-		<?php if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : // Are there comments to navigate through. ?>
-		<nav id="comment-nav-below" class="comment-navigation" role="navigation" aria-label="<?php esc_attr_e( 'Comment Navigation Below', 'storefront' ); ?>">
-			<span class="screen-reader-text"><?php esc_html_e( 'Comment navigation', 'storefront' ); ?></span>
-			<div class="nav-previous"><?php previous_comments_link( __( '&larr; Older Comments', 'storefront' ) ); ?></div>
-			<div class="nav-next"><?php next_comments_link( __( 'Newer Comments &rarr;', 'storefront' ) ); ?></div>
-		</nav><!-- #comment-nav-below -->
-			<?php
-		endif; // Check for comment navigation.
-
-	endif;
-
-	if ( ! comments_open() && 0 !== intval( get_comments_number() ) && post_type_supports( get_post_type(), 'comments' ) ) :
-		?>
-		<p class="no-comments"><?php esc_html_e( 'Comments are closed.', 'storefront' ); ?></p>
 		<?php
-	endif;
+		the_comments_navigation();
 
-	$args = apply_filters(
-		'storefront_comment_form_args',
-		array(
-			'title_reply_before' => '<span id="reply-title" class="gamma comment-reply-title">',
-			'title_reply_after'  => '</span>',
-		)
-	);
+		// If comments are closed and there are comments, let's leave a little note, shall we?
+		if ( ! comments_open() ) :
+			?>
+			<p class="no-comments"><?php esc_html_e( 'Comments are closed.', 'bubbleskincare' ); ?></p>
+			<?php
+		endif;
 
-	comment_form( $args );
+	endif; // Check for have_comments().
+
+	comment_form();
 	?>
 
-</section><!-- #comments -->
+</div><!-- #comments -->

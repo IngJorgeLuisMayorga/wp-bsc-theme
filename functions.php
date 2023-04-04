@@ -1,74 +1,184 @@
 <?php
 /**
- * Storefront engine room
+ * BubbleSkinCareTheme functions and definitions
  *
- * @package storefront
+ * @link https://developer.wordpress.org/themes/basics/theme-functions/
+ *
+ * @package BubbleSkinCareTheme
  */
 
-/**
- * Assign the Storefront version to a var
- */
-$theme              = wp_get_theme( 'storefront' );
-$storefront_version = $theme['Version'];
-
-/**
- * Set the content width based on the theme's design and stylesheet.
- */
-if ( ! isset( $content_width ) ) {
-	$content_width = 980; /* pixels */
+if ( ! defined( '_S_VERSION' ) ) {
+	// Replace the version number of the theme on each release.
+	define( '_S_VERSION', '1.0.0' );
 }
 
-$storefront = (object) array(
-	'version'    => $storefront_version,
+/**
+ * Sets up theme defaults and registers support for various WordPress features.
+ *
+ * Note that this function is hooked into the after_setup_theme hook, which
+ * runs before the init hook. The init hook is too late for some features, such
+ * as indicating support for post thumbnails.
+ */
+function bubbleskincare_setup() {
+	/*
+		* Make theme available for translation.
+		* Translations can be filed in the /languages/ directory.
+		* If you're building a theme based on BubbleSkinCareTheme, use a find and replace
+		* to change 'bubbleskincare' to the name of your theme in all the template files.
+		*/
+	load_theme_textdomain( 'bubbleskincare', get_template_directory() . '/languages' );
+
+	// Add default posts and comments RSS feed links to head.
+	add_theme_support( 'automatic-feed-links' );
+
+	/*
+		* Let WordPress manage the document title.
+		* By adding theme support, we declare that this theme does not use a
+		* hard-coded <title> tag in the document head, and expect WordPress to
+		* provide it for us.
+		*/
+	add_theme_support( 'title-tag' );
+
+	/*
+		* Enable support for Post Thumbnails on posts and pages.
+		*
+		* @link https://developer.wordpress.org/themes/functionality/featured-images-post-thumbnails/
+		*/
+	add_theme_support( 'post-thumbnails' );
+
+	// This theme uses wp_nav_menu() in one location.
+	register_nav_menus(
+		array(
+			'menu-1' => esc_html__( 'Primary', 'bubbleskincare' ),
+		)
+	);
+
+	/*
+		* Switch default core markup for search form, comment form, and comments
+		* to output valid HTML5.
+		*/
+	add_theme_support(
+		'html5',
+		array(
+			'search-form',
+			'comment-form',
+			'comment-list',
+			'gallery',
+			'caption',
+			'style',
+			'script',
+		)
+	);
+
+	// Set up the WordPress core custom background feature.
+	add_theme_support(
+		'custom-background',
+		apply_filters(
+			'bubbleskincare_custom_background_args',
+			array(
+				'default-color' => 'ffffff',
+				'default-image' => '',
+			)
+		)
+	);
+
+	// Add theme support for selective refresh for widgets.
+	add_theme_support( 'customize-selective-refresh-widgets' );
 
 	/**
-	 * Initialize all the things.
+	 * Add support for core custom logo.
+	 *
+	 * @link https://codex.wordpress.org/Theme_Logo
 	 */
-	'main'       => require 'inc/class-storefront.php',
-	'customizer' => require 'inc/customizer/class-storefront-customizer.php',
-);
-
-require 'inc/storefront-functions.php';
-require 'inc/storefront-template-hooks.php';
-require 'inc/storefront-template-functions.php';
-require 'inc/wordpress-shims.php';
-
-if ( class_exists( 'Jetpack' ) ) {
-	$storefront->jetpack = require 'inc/jetpack/class-storefront-jetpack.php';
+	add_theme_support(
+		'custom-logo',
+		array(
+			'height'      => 250,
+			'width'       => 250,
+			'flex-width'  => true,
+			'flex-height' => true,
+		)
+	);
 }
+add_action( 'after_setup_theme', 'bubbleskincare_setup' );
 
-if ( storefront_is_woocommerce_activated() ) {
-	$storefront->woocommerce            = require 'inc/woocommerce/class-storefront-woocommerce.php';
-	$storefront->woocommerce_customizer = require 'inc/woocommerce/class-storefront-woocommerce-customizer.php';
-
-	require 'inc/woocommerce/class-storefront-woocommerce-adjacent-products.php';
-
-	require 'inc/woocommerce/storefront-woocommerce-template-hooks.php';
-	require 'inc/woocommerce/storefront-woocommerce-template-functions.php';
-	require 'inc/woocommerce/storefront-woocommerce-functions.php';
+/**
+ * Set the content width in pixels, based on the theme's design and stylesheet.
+ *
+ * Priority 0 to make it available to lower priority callbacks.
+ *
+ * @global int $content_width
+ */
+function bubbleskincare_content_width() {
+	$GLOBALS['content_width'] = apply_filters( 'bubbleskincare_content_width', 640 );
 }
+add_action( 'after_setup_theme', 'bubbleskincare_content_width', 0 );
 
-if ( is_admin() ) {
-	$storefront->admin = require 'inc/admin/class-storefront-admin.php';
+/**
+ * Register widget area.
+ *
+ * @link https://developer.wordpress.org/themes/functionality/sidebars/#registering-a-sidebar
+ */
+function bubbleskincare_widgets_init() {
+	register_sidebar(
+		array(
+			'name'          => esc_html__( 'Sidebar', 'bubbleskincare' ),
+			'id'            => 'sidebar-1',
+			'description'   => esc_html__( 'Add widgets here.', 'bubbleskincare' ),
+			'before_widget' => '<section id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</section>',
+			'before_title'  => '<h2 class="widget-title">',
+			'after_title'   => '</h2>',
+		)
+	);
+}
+add_action( 'widgets_init', 'bubbleskincare_widgets_init' );
 
-	require 'inc/admin/class-storefront-plugin-install.php';
+/**
+ * Enqueue scripts and styles.
+ */
+function bubbleskincare_scripts() {
+	wp_enqueue_style( 'bubbleskincare-style', get_stylesheet_uri(), array(), _S_VERSION );
+	wp_style_add_data( 'bubbleskincare-style', 'rtl', 'replace' );
+
+	wp_enqueue_script( 'bubbleskincare-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
+
+	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
+		wp_enqueue_script( 'comment-reply' );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'bubbleskincare_scripts' );
+
+/**
+ * Implement the Custom Header feature.
+ */
+require get_template_directory() . '/inc/custom-header.php';
+
+/**
+ * Custom template tags for this theme.
+ */
+require get_template_directory() . '/inc/template-tags.php';
+
+/**
+ * Functions which enhance the theme by hooking into WordPress.
+ */
+require get_template_directory() . '/inc/template-functions.php';
+
+/**
+ * Customizer additions.
+ */
+require get_template_directory() . '/inc/customizer.php';
+
+/**
+ * Load Jetpack compatibility file.
+ */
+if ( defined( 'JETPACK__VERSION' ) ) {
+	require get_template_directory() . '/inc/jetpack.php';
 }
 
 /**
- * NUX
- * Only load if wp version is 4.7.3 or above because of this issue;
- * https://core.trac.wordpress.org/ticket/39610?cversion=1&cnum_hist=2
+ * Load WooCommerce compatibility file.
  */
-if ( version_compare( get_bloginfo( 'version' ), '4.7.3', '>=' ) && ( is_admin() || is_customize_preview() ) ) {
-	require 'inc/nux/class-storefront-nux-admin.php';
-	require 'inc/nux/class-storefront-nux-guided-tour.php';
-	require 'inc/nux/class-storefront-nux-starter-content.php';
+if ( class_exists( 'WooCommerce' ) ) {
+	require get_template_directory() . '/inc/woocommerce.php';
 }
-
-/**
- * Note: Do not add any custom code here. Please use a custom plugin so that your customizations aren't lost during updates.
- * https://github.com/woocommerce/theme-customisations
- */
-
-
-require 'components/bsc_functions.php';
